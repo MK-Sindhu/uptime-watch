@@ -4,16 +4,20 @@
   "target": "postgres",
   "profileHash": "3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2",
   "roots": {
-    "Region": {
-      "model": "Region",
+    "region": {
+      "model": "region",
       "namespace": "public"
     },
-    "Website": {
-      "model": "Website",
+    "user": {
+      "model": "user",
       "namespace": "public"
     },
-    "WebsiteTick": {
-      "model": "WebsiteTick",
+    "website": {
+      "model": "website",
+      "namespace": "public"
+    },
+    "website_tick": {
+      "model": "website_tick",
       "namespace": "public"
     }
   },
@@ -21,7 +25,7 @@
     "namespaces": {
       "public": {
         "enum": {
-          "WebsiteStatus": {
+          "website_status": {
             "codecId": "pg/text@1",
             "members": [
               {
@@ -40,7 +44,7 @@
           }
         },
         "models": {
-          "Region": {
+          "region": {
             "fields": {
               "id": {
                 "nullable": false,
@@ -69,7 +73,7 @@
                   ]
                 },
                 "to": {
-                  "model": "WebsiteTick",
+                  "model": "website_tick",
                   "namespace": "public"
                 }
               }
@@ -84,10 +88,10 @@
                 }
               },
               "namespaceId": "public",
-              "table": "Region"
+              "table": "region"
             }
           },
-          "Website": {
+          "user": {
             "fields": {
               "id": {
                 "nullable": false,
@@ -96,7 +100,64 @@
                   "kind": "scalar"
                 }
               },
-              "timeAdded": {
+              "password": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "username": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {
+              "website": {
+                "cardinality": "1:N",
+                "on": {
+                  "localFields": [
+                    "id"
+                  ],
+                  "targetFields": [
+                    "user_id"
+                  ]
+                },
+                "to": {
+                  "model": "website",
+                  "namespace": "public"
+                }
+              }
+            },
+            "storage": {
+              "fields": {
+                "id": {
+                  "column": "id"
+                },
+                "password": {
+                  "column": "password"
+                },
+                "username": {
+                  "column": "username"
+                }
+              },
+              "namespaceId": "public",
+              "table": "user"
+            }
+          },
+          "website": {
+            "fields": {
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "time_added": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/timestamptz-temporal@1",
@@ -104,6 +165,13 @@
                 }
               },
               "url": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "user_id": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/text@1",
@@ -123,7 +191,23 @@
                   ]
                 },
                 "to": {
-                  "model": "WebsiteTick",
+                  "model": "website_tick",
+                  "namespace": "public"
+                }
+              },
+              "user": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "user_id"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "user",
                   "namespace": "public"
                 }
               }
@@ -133,19 +217,29 @@
                 "id": {
                   "column": "id"
                 },
-                "timeAdded": {
-                  "column": "timeAdded"
+                "time_added": {
+                  "column": "time_added"
                 },
                 "url": {
                   "column": "url"
+                },
+                "user_id": {
+                  "column": "user_id"
                 }
               },
               "namespaceId": "public",
-              "table": "Website"
+              "table": "website"
             }
           },
-          "WebsiteTick": {
+          "website_tick": {
             "fields": {
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "kind": "scalar"
+                }
+              },
               "id": {
                 "nullable": false,
                 "type": {
@@ -175,7 +269,7 @@
                 },
                 "valueSet": {
                   "entityKind": "enum",
-                  "entityName": "WebsiteStatus",
+                  "entityName": "website_status",
                   "namespaceId": "public",
                   "plane": "domain"
                 }
@@ -201,7 +295,7 @@
                   ]
                 },
                 "to": {
-                  "model": "Region",
+                  "model": "region",
                   "namespace": "public"
                 }
               },
@@ -217,13 +311,16 @@
                   ]
                 },
                 "to": {
-                  "model": "Website",
+                  "model": "website",
                   "namespace": "public"
                 }
               }
             },
             "storage": {
               "fields": {
+                "createdAt": {
+                  "column": "createdAt"
+                },
                 "id": {
                   "column": "id"
                 },
@@ -241,7 +338,7 @@
                 }
               },
               "namespaceId": "public",
-              "table": "WebsiteTick"
+              "table": "website_tick"
             }
           }
         }
@@ -253,7 +350,7 @@
       "public": {
         "entries": {
           "table": {
-            "Region": {
+            "region": {
               "columns": {
                 "id": {
                   "codecId": "pg/text@1",
@@ -275,19 +372,19 @@
               },
               "uniques": []
             },
-            "Website": {
+            "user": {
               "columns": {
                 "id": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
                   "nullable": false
                 },
-                "timeAdded": {
-                  "codecId": "pg/timestamptz-temporal@1",
-                  "dataType": "pg/timestamptz",
+                "password": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
                   "nullable": false
                 },
-                "url": {
+                "username": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
                   "nullable": false
@@ -300,17 +397,93 @@
                   "id"
                 ]
               },
+              "uniques": [
+                {
+                  "columns": [
+                    "username"
+                  ]
+                }
+              ]
+            },
+            "website": {
+              "columns": {
+                "id": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "time_added": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "dataType": "pg/timestamptz",
+                  "nullable": false
+                },
+                "url": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "user_id": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [
+                {
+                  "index": {
+                    "name": "website_user_id_idx_6c952402"
+                  },
+                  "source": {
+                    "columns": [
+                      "user_id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "website"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "user"
+                  }
+                }
+              ],
+              "indexes": [
+                {
+                  "columns": [
+                    "user_id"
+                  ],
+                  "name": "website_user_id_idx_6c952402",
+                  "prefix": "website_user_id_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
               "uniques": []
             },
-            "WebsiteTick": {
+            "website_tick": {
               "checks": [
                 {
                   "expression": "\"status\" IN ('Up', 'Down', 'Unknown')",
-                  "name": "WebsiteTick_status_check_92990d30",
-                  "prefix": "WebsiteTick_status_check"
+                  "name": "website_tick_status_check_92990d30",
+                  "prefix": "website_tick_status_check"
                 }
               ],
               "columns": {
+                "createdAt": {
+                  "codecId": "pg/timestamptz-temporal@1",
+                  "dataType": "pg/timestamptz",
+                  "default": {
+                    "expression": "now()",
+                    "kind": "function"
+                  },
+                  "nullable": false
+                },
                 "id": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
@@ -332,7 +505,7 @@
                   "nullable": false,
                   "valueSet": {
                     "entityKind": "valueSet",
-                    "entityName": "WebsiteStatus",
+                    "entityName": "website_status",
                     "namespaceId": "public",
                     "plane": "storage"
                   }
@@ -346,40 +519,40 @@
               "foreignKeys": [
                 {
                   "index": {
-                    "name": "WebsiteTick_region_id_idx_22635963"
+                    "name": "website_tick_region_id_idx_22635963"
                   },
                   "source": {
                     "columns": [
                       "region_id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "WebsiteTick"
+                    "tableName": "website_tick"
                   },
                   "target": {
                     "columns": [
                       "id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Region"
+                    "tableName": "region"
                   }
                 },
                 {
                   "index": {
-                    "name": "WebsiteTick_website_id_idx_cb828943"
+                    "name": "website_tick_website_id_idx_cb828943"
                   },
                   "source": {
                     "columns": [
                       "website_id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "WebsiteTick"
+                    "tableName": "website_tick"
                   },
                   "target": {
                     "columns": [
                       "id"
                     ],
                     "namespaceId": "public",
-                    "tableName": "Website"
+                    "tableName": "website"
                   }
                 }
               ],
@@ -388,16 +561,16 @@
                   "columns": [
                     "region_id"
                   ],
-                  "name": "WebsiteTick_region_id_idx_22635963",
-                  "prefix": "WebsiteTick_region_id_idx",
+                  "name": "website_tick_region_id_idx_22635963",
+                  "prefix": "website_tick_region_id_idx",
                   "unique": false
                 },
                 {
                   "columns": [
                     "website_id"
                   ],
-                  "name": "WebsiteTick_website_id_idx_cb828943",
-                  "prefix": "WebsiteTick_website_id_idx",
+                  "name": "website_tick_website_id_idx_cb828943",
+                  "prefix": "website_tick_website_id_idx",
                   "unique": false
                 }
               ],
@@ -410,7 +583,7 @@
             }
           },
           "valueSet": {
-            "WebsiteStatus": {
+            "website_status": {
               "kind": "valueSet",
               "values": [
                 "Up",
@@ -424,10 +597,10 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "da1afc82f2f0df1f6d5bb1abba1fdc85991aeb91d3518bfd75e3e6af11df91ba"
+    "storageHash": "bcf5aebed317725447c255f0071e1525fe8674e1c4dbf997bca1f37df6642ade"
   },
   "execution": {
-    "executionHash": "9ef3595a98e36e4b3eef3372bae6545374a033a9ee05923382a30b157eded99b",
+    "executionHash": "dfb0d9f060f8a0cdf51d0d4a57b02c124421799d51e914f691266be4eb4a3962",
     "mutations": {
       "defaults": [
         {
@@ -436,7 +609,7 @@
             "kind": "generator"
           },
           "ref": {
-            "entry": "Region",
+            "entry": "region",
             "field": "id",
             "namespace": "public"
           }
@@ -447,7 +620,7 @@
             "kind": "generator"
           },
           "ref": {
-            "entry": "Website",
+            "entry": "user",
             "field": "id",
             "namespace": "public"
           }
@@ -458,7 +631,18 @@
             "kind": "generator"
           },
           "ref": {
-            "entry": "WebsiteTick",
+            "entry": "website",
+            "field": "id",
+            "namespace": "public"
+          }
+        },
+        {
+          "onCreate": {
+            "id": "uuidv4",
+            "kind": "generator"
+          },
+          "ref": {
+            "entry": "website_tick",
             "field": "id",
             "namespace": "public"
           }

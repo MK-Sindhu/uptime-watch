@@ -51,3 +51,8 @@ tmp/
 .cache/
 AGENTS.md
 CLAUDE.md
+# AI tool folders
+.cursor/
+.claude/
+.agents/
+.devin/

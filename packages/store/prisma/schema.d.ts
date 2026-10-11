@@ -18,9 +18,9 @@ import type {
 } from '@prisma/orm-postgres/contract/types';
 
 export type StorageHash =
-  StorageHashBase<'da1afc82f2f0df1f6d5bb1abba1fdc85991aeb91d3518bfd75e3e6af11df91ba'>;
+  StorageHashBase<'bcf5aebed317725447c255f0071e1525fe8674e1c4dbf997bca1f37df6642ade'>;
 export type ExecutionHash =
-  ExecutionHashBase<'9ef3595a98e36e4b3eef3372bae6545374a033a9ee05923382a30b157eded99b'>;
+  ExecutionHashBase<'dfb0d9f060f8a0cdf51d0d4a57b02c124421799d51e914f691266be4eb4a3962'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -234,16 +234,23 @@ type DefaultLiteralValue<CodecId extends string, Encoded> = CodecId extends keyo
 
 export type FieldOutputTypes = {
   readonly public: {
-    readonly Region: {
+    readonly region: {
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
     };
-    readonly Website: {
+    readonly user: {
       readonly id: CodecTypes['pg/text@1']['output'];
-      readonly timeAdded: CodecTypes['pg/timestamptz-temporal@1']['output'];
-      readonly url: CodecTypes['pg/text@1']['output'];
+      readonly password: CodecTypes['pg/text@1']['output'];
+      readonly username: CodecTypes['pg/text@1']['output'];
     };
-    readonly WebsiteTick: {
+    readonly website: {
+      readonly id: CodecTypes['pg/text@1']['output'];
+      readonly time_added: CodecTypes['pg/timestamptz-temporal@1']['output'];
+      readonly url: CodecTypes['pg/text@1']['output'];
+      readonly user_id: CodecTypes['pg/text@1']['output'];
+    };
+    readonly website_tick: {
+      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly region_id: CodecTypes['pg/text@1']['output'];
       readonly response_time_ms: CodecTypes['pg/int4@1']['output'];
@@ -254,16 +261,23 @@ export type FieldOutputTypes = {
 };
 export type FieldInputTypes = {
   readonly public: {
-    readonly Region: {
+    readonly region: {
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
     };
-    readonly Website: {
+    readonly user: {
       readonly id: CodecTypes['pg/text@1']['input'];
-      readonly timeAdded: CodecTypes['pg/timestamptz-temporal@1']['input'];
-      readonly url: CodecTypes['pg/text@1']['input'];
+      readonly password: CodecTypes['pg/text@1']['input'];
+      readonly username: CodecTypes['pg/text@1']['input'];
     };
-    readonly WebsiteTick: {
+    readonly website: {
+      readonly id: CodecTypes['pg/text@1']['input'];
+      readonly time_added: CodecTypes['pg/timestamptz-temporal@1']['input'];
+      readonly url: CodecTypes['pg/text@1']['input'];
+      readonly user_id: CodecTypes['pg/text@1']['input'];
+    };
+    readonly website_tick: {
+      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly region_id: CodecTypes['pg/text@1']['input'];
       readonly response_time_ms: CodecTypes['pg/int4@1']['input'];
@@ -274,16 +288,23 @@ export type FieldInputTypes = {
 };
 export type StorageColumnTypes = {
   readonly public: {
-    readonly Region: {
+    readonly region: {
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly name: CodecTypes['pg/text@1']['output'];
     };
-    readonly Website: {
+    readonly user: {
       readonly id: CodecTypes['pg/text@1']['output'];
-      readonly timeAdded: CodecTypes['pg/timestamptz-temporal@1']['output'];
-      readonly url: CodecTypes['pg/text@1']['output'];
+      readonly password: CodecTypes['pg/text@1']['output'];
+      readonly username: CodecTypes['pg/text@1']['output'];
     };
-    readonly WebsiteTick: {
+    readonly website: {
+      readonly id: CodecTypes['pg/text@1']['output'];
+      readonly time_added: CodecTypes['pg/timestamptz-temporal@1']['output'];
+      readonly url: CodecTypes['pg/text@1']['output'];
+      readonly user_id: CodecTypes['pg/text@1']['output'];
+    };
+    readonly website_tick: {
+      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
       readonly id: CodecTypes['pg/text@1']['output'];
       readonly region_id: CodecTypes['pg/text@1']['output'];
       readonly response_time_ms: CodecTypes['pg/int4@1']['output'];
@@ -294,16 +315,23 @@ export type StorageColumnTypes = {
 };
 export type StorageColumnInputTypes = {
   readonly public: {
-    readonly Region: {
+    readonly region: {
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly name: CodecTypes['pg/text@1']['input'];
     };
-    readonly Website: {
+    readonly user: {
       readonly id: CodecTypes['pg/text@1']['input'];
-      readonly timeAdded: CodecTypes['pg/timestamptz-temporal@1']['input'];
-      readonly url: CodecTypes['pg/text@1']['input'];
+      readonly password: CodecTypes['pg/text@1']['input'];
+      readonly username: CodecTypes['pg/text@1']['input'];
     };
-    readonly WebsiteTick: {
+    readonly website: {
+      readonly id: CodecTypes['pg/text@1']['input'];
+      readonly time_added: CodecTypes['pg/timestamptz-temporal@1']['input'];
+      readonly url: CodecTypes['pg/text@1']['input'];
+      readonly user_id: CodecTypes['pg/text@1']['input'];
+    };
+    readonly website_tick: {
+      readonly createdAt: CodecTypes['pg/timestamptz-temporal@1']['input'];
       readonly id: CodecTypes['pg/text@1']['input'];
       readonly region_id: CodecTypes['pg/text@1']['input'];
       readonly response_time_ms: CodecTypes['pg/int4@1']['input'];
@@ -314,36 +342,47 @@ export type StorageColumnInputTypes = {
 };
 
 export namespace Models {
-  export type public_Region = {
+  export type public_region = {
     id: CodecTypes['pg/text@1']['output'];
     name: CodecTypes['pg/text@1']['output'];
-    ticks: public_WebsiteTick[];
+    ticks: public_website_tick[];
     readonly [RelationKeys]?: 'ticks';
   };
-  export type public_Website = {
+  export type public_user = {
     id: CodecTypes['pg/text@1']['output'];
-    timeAdded: CodecTypes['pg/timestamptz-temporal@1']['output'];
-    url: CodecTypes['pg/text@1']['output'];
-    ticks: public_WebsiteTick[];
-    readonly [RelationKeys]?: 'ticks';
+    password: CodecTypes['pg/text@1']['output'];
+    username: CodecTypes['pg/text@1']['output'];
+    website: public_website[];
+    readonly [RelationKeys]?: 'website';
   };
-  export type public_WebsiteTick = {
+  export type public_website = {
+    id: CodecTypes['pg/text@1']['output'];
+    time_added: CodecTypes['pg/timestamptz-temporal@1']['output'];
+    url: CodecTypes['pg/text@1']['output'];
+    user_id: CodecTypes['pg/text@1']['output'];
+    ticks: public_website_tick[];
+    user: public_user;
+    readonly [RelationKeys]?: 'ticks' | 'user';
+  };
+  export type public_website_tick = {
+    createdAt: CodecTypes['pg/timestamptz-temporal@1']['output'];
     id: CodecTypes['pg/text@1']['output'];
     region_id: CodecTypes['pg/text@1']['output'];
     response_time_ms: CodecTypes['pg/int4@1']['output'];
     status: 'Up' | 'Down' | 'Unknown';
     website_id: CodecTypes['pg/text@1']['output'];
-    region: public_Region;
-    website: public_Website;
+    region: public_region;
+    website: public_website;
     readonly [RelationKeys]?: 'region' | 'website';
   };
 }
 
 export declare const models: {
   public: {
-    Region: Models.public_Region;
-    Website: Models.public_Website;
-    WebsiteTick: Models.public_WebsiteTick;
+    region: Models.public_region;
+    user: Models.public_user;
+    website: Models.public_website;
+    website_tick: Models.public_website_tick;
   };
 };
 
@@ -365,7 +404,7 @@ type ContractBase = Omit<
         readonly kind: 'postgres-schema';
         readonly entries: {
           readonly table: {
-            readonly Region: {
+            readonly region: {
               columns: {
                 readonly id: {
                   readonly dataType: 'pg/text';
@@ -385,7 +424,7 @@ type ContractBase = Omit<
               indexes: readonly [];
               foreignKeys: readonly [];
             };
-            readonly Website: {
+            readonly user: {
               columns: {
                 readonly id: {
                   readonly dataType: 'pg/text';
@@ -393,7 +432,33 @@ type ContractBase = Omit<
                   readonly nullable: false;
                   readonly many: false;
                 };
-                readonly timeAdded: {
+                readonly password: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly username: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [{ readonly columns: readonly ['username'] }];
+              indexes: readonly [];
+              foreignKeys: readonly [];
+            };
+            readonly website: {
+              columns: {
+                readonly id: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly time_added: {
                   readonly dataType: 'pg/timestamptz';
                   readonly codecId: 'pg/timestamptz-temporal@1';
                   readonly nullable: false;
@@ -405,14 +470,47 @@ type ContractBase = Omit<
                   readonly nullable: false;
                   readonly many: false;
                 };
+                readonly user_id: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
               };
               primaryKey: { readonly columns: readonly ['id'] };
               uniques: readonly [];
-              indexes: readonly [];
-              foreignKeys: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'website_user_id_idx_6c952402';
+                  readonly prefix: 'website_user_id_idx';
+                  readonly columns: readonly ['user_id'];
+                  readonly unique: false;
+                },
+              ];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'website';
+                    readonly columns: readonly ['user_id'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'user';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
             };
-            readonly WebsiteTick: {
+            readonly website_tick: {
               columns: {
+                readonly createdAt: {
+                  readonly dataType: 'pg/timestamptz';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                  readonly nullable: false;
+                  readonly default: { readonly kind: 'function'; readonly expression: 'now()' };
+                  readonly many: false;
+                };
                 readonly id: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
@@ -448,14 +546,14 @@ type ContractBase = Omit<
               uniques: readonly [];
               indexes: readonly [
                 {
-                  readonly name: 'WebsiteTick_region_id_idx_22635963';
-                  readonly prefix: 'WebsiteTick_region_id_idx';
+                  readonly name: 'website_tick_region_id_idx_22635963';
+                  readonly prefix: 'website_tick_region_id_idx';
                   readonly columns: readonly ['region_id'];
                   readonly unique: false;
                 },
                 {
-                  readonly name: 'WebsiteTick_website_id_idx_cb828943';
-                  readonly prefix: 'WebsiteTick_website_id_idx';
+                  readonly name: 'website_tick_website_id_idx_cb828943';
+                  readonly prefix: 'website_tick_website_id_idx';
                   readonly columns: readonly ['website_id'];
                   readonly unique: false;
                 },
@@ -464,24 +562,24 @@ type ContractBase = Omit<
                 {
                   readonly source: {
                     readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'WebsiteTick';
+                    readonly tableName: 'website_tick';
                     readonly columns: readonly ['region_id'];
                   };
                   readonly target: {
                     readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'Region';
+                    readonly tableName: 'region';
                     readonly columns: readonly ['id'];
                   };
                 },
                 {
                   readonly source: {
                     readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'WebsiteTick';
+                    readonly tableName: 'website_tick';
                     readonly columns: readonly ['website_id'];
                   };
                   readonly target: {
                     readonly namespaceId: 'public' & NamespaceId;
-                    readonly tableName: 'Website';
+                    readonly tableName: 'website';
                     readonly columns: readonly ['id'];
                   };
                 },
@@ -489,7 +587,7 @@ type ContractBase = Omit<
             };
           };
           readonly valueSet: {
-            readonly WebsiteStatus: {
+            readonly website_status: {
               readonly kind: 'valueSet';
               readonly values: readonly ['Up', 'Down', 'Unknown'];
             };
@@ -504,18 +602,19 @@ type ContractBase = Omit<
   readonly target: 'postgres';
   readonly targetFamily: 'sql';
   readonly roots: {
-    readonly Region: { readonly namespace: 'public' & NamespaceId; readonly model: 'Region' };
-    readonly Website: { readonly namespace: 'public' & NamespaceId; readonly model: 'Website' };
-    readonly WebsiteTick: {
+    readonly region: { readonly namespace: 'public' & NamespaceId; readonly model: 'region' };
+    readonly user: { readonly namespace: 'public' & NamespaceId; readonly model: 'user' };
+    readonly website: { readonly namespace: 'public' & NamespaceId; readonly model: 'website' };
+    readonly website_tick: {
       readonly namespace: 'public' & NamespaceId;
-      readonly model: 'WebsiteTick';
+      readonly model: 'website_tick';
     };
   };
   readonly domain: {
     readonly namespaces: {
       readonly public: {
         readonly models: {
-          readonly Region: {
+          readonly region: {
             readonly fields: {
               readonly id: {
                 readonly nullable: false;
@@ -530,7 +629,7 @@ type ContractBase = Omit<
               readonly ticks: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
-                  readonly model: 'WebsiteTick';
+                  readonly model: 'website_tick';
                 };
                 readonly cardinality: '1:N';
                 readonly on: {
@@ -540,7 +639,7 @@ type ContractBase = Omit<
               };
             };
             readonly storage: {
-              readonly table: 'Region';
+              readonly table: 'region';
               readonly namespaceId: 'public';
               readonly fields: {
                 readonly id: { readonly column: 'id' };
@@ -548,13 +647,51 @@ type ContractBase = Omit<
               };
             };
           };
-          readonly Website: {
+          readonly user: {
             readonly fields: {
               readonly id: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
-              readonly timeAdded: {
+              readonly password: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly username: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+            };
+            readonly relations: {
+              readonly website: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'website';
+                };
+                readonly cardinality: '1:N';
+                readonly on: {
+                  readonly localFields: readonly ['id'];
+                  readonly targetFields: readonly ['user_id'];
+                };
+              };
+            };
+            readonly storage: {
+              readonly table: 'user';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly id: { readonly column: 'id' };
+                readonly password: { readonly column: 'password' };
+                readonly username: { readonly column: 'username' };
+              };
+            };
+          };
+          readonly website: {
+            readonly fields: {
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly time_added: {
                 readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
@@ -565,12 +702,16 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly user_id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
             };
             readonly relations: {
               readonly ticks: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
-                  readonly model: 'WebsiteTick';
+                  readonly model: 'website_tick';
                 };
                 readonly cardinality: '1:N';
                 readonly on: {
@@ -578,19 +719,36 @@ type ContractBase = Omit<
                   readonly targetFields: readonly ['website_id'];
                 };
               };
+              readonly user: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'user' };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['user_id'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
             };
             readonly storage: {
-              readonly table: 'Website';
+              readonly table: 'website';
               readonly namespaceId: 'public';
               readonly fields: {
                 readonly id: { readonly column: 'id' };
-                readonly timeAdded: { readonly column: 'timeAdded' };
+                readonly time_added: { readonly column: 'time_added' };
                 readonly url: { readonly column: 'url' };
+                readonly user_id: { readonly column: 'user_id' };
               };
             };
           };
-          readonly WebsiteTick: {
+          readonly website_tick: {
             readonly fields: {
+              readonly createdAt: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/timestamptz-temporal@1';
+                };
+              };
               readonly id: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -616,7 +774,7 @@ type ContractBase = Omit<
               readonly region: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
-                  readonly model: 'Region';
+                  readonly model: 'region';
                 };
                 readonly cardinality: 'N:1';
                 readonly nullable: false;
@@ -628,7 +786,7 @@ type ContractBase = Omit<
               readonly website: {
                 readonly to: {
                   readonly namespace: 'public' & NamespaceId;
-                  readonly model: 'Website';
+                  readonly model: 'website';
                 };
                 readonly cardinality: 'N:1';
                 readonly nullable: false;
@@ -639,9 +797,10 @@ type ContractBase = Omit<
               };
             };
             readonly storage: {
-              readonly table: 'WebsiteTick';
+              readonly table: 'website_tick';
               readonly namespaceId: 'public';
               readonly fields: {
+                readonly createdAt: { readonly column: 'createdAt' };
                 readonly id: { readonly column: 'id' };
                 readonly region_id: { readonly column: 'region_id' };
                 readonly response_time_ms: { readonly column: 'response_time_ms' };
@@ -652,7 +811,7 @@ type ContractBase = Omit<
           };
         };
         readonly enum: {
-          readonly WebsiteStatus: {
+          readonly website_status: {
             readonly codecId: 'pg/text@1';
             readonly members: readonly [
               { readonly name: 'Up'; readonly value: 'Up' },
@@ -662,7 +821,7 @@ type ContractBase = Omit<
           };
         };
         readonly enumMemberTypes?: {
-          readonly WebsiteStatus: readonly [
+          readonly website_status: readonly [
             { readonly name: 'Up'; readonly value: 'Up' },
             { readonly name: 'Down'; readonly value: 'Down' },
             { readonly name: 'Unknown'; readonly value: 'Unknown' },
@@ -706,7 +865,7 @@ type ContractBase = Omit<
         {
           readonly onCreate: { readonly id: 'uuidv4'; readonly kind: 'generator' };
           readonly ref: {
-            readonly entry: 'Region';
+            readonly entry: 'region';
             readonly field: 'id';
             readonly namespace: 'public';
           };
@@ -714,7 +873,7 @@ type ContractBase = Omit<
         {
           readonly onCreate: { readonly id: 'uuidv4'; readonly kind: 'generator' };
           readonly ref: {
-            readonly entry: 'Website';
+            readonly entry: 'user';
             readonly field: 'id';
             readonly namespace: 'public';
           };
@@ -722,7 +881,15 @@ type ContractBase = Omit<
         {
           readonly onCreate: { readonly id: 'uuidv4'; readonly kind: 'generator' };
           readonly ref: {
-            readonly entry: 'WebsiteTick';
+            readonly entry: 'website';
+            readonly field: 'id';
+            readonly namespace: 'public';
+          };
+        },
+        {
+          readonly onCreate: { readonly id: 'uuidv4'; readonly kind: 'generator' };
+          readonly ref: {
+            readonly entry: 'website_tick';
             readonly field: 'id';
             readonly namespace: 'public';
           };
