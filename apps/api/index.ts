@@ -36,7 +36,7 @@ app.get("/status/:websiteId", authMiddleware, async (req, res) => {
         .include("ticks", (ticks) =>
             ticks
                 .orderBy((t) => t.createdAt.desc())
-                .limit(1),
+                .limit(10),
         )
         .first();
 
@@ -51,6 +51,21 @@ app.get("/status/:websiteId", authMiddleware, async (req, res) => {
         id: website.id,
         user_id: website.user_id
      })
+});
+
+app.get("/websites", authMiddleware, async (req, res) => {
+    const websites = await db.orm.public.website
+        .where({ user_id: req.userId! })
+        .include("ticks", (ticks) =>
+            ticks
+                .orderBy((t) => t.createdAt.desc())
+                .limit(30),
+        )
+        .all();
+
+    res.json({
+        websites
+    })
 });
 
 app.post("/user/signup", async (req, res) => {
