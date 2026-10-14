@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.join(__dirname, "../.."),
   },
+  // packages/api-client ships TypeScript source; let Next compile it.
+  transpilePackages: ["api-client"],
   async rewrites() {
     return [
       {

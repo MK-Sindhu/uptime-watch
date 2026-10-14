@@ -89,7 +89,7 @@ export function PulseTrace({
         )}
         <path
           d={up}
-          className="stroke-trace"
+          className="glow stroke-stable text-stable"
           strokeWidth={1.5}
           strokeLinejoin="round"
           fill="none"
@@ -105,7 +105,7 @@ export function PulseTrace({
         />
         <path
           d={down}
-          className="stroke-pulse-down"
+          className="glow stroke-critical text-critical"
           strokeWidth={2.5}
           fill="none"
           vectorEffect="non-scaling-stroke"
@@ -117,12 +117,12 @@ export function PulseTrace({
             y1={8}
             y2={H - 8}
             className={cn(
-              "cursor-blink",
+              "cursor-blink glow",
               newest.status === "Down"
-                ? "stroke-pulse-down"
+                ? "stroke-critical text-critical"
                 : newest.status === "Up"
-                  ? "stroke-pulse-up"
-                  : "stroke-pulse-wait"
+                  ? "stroke-stable text-stable"
+                  : "stroke-pulse-wait text-pulse-wait"
             )}
             strokeWidth={3}
             vectorEffect="non-scaling-stroke"
@@ -176,7 +176,7 @@ export function HeroTrace({ className }: { className?: string }) {
       <path
         d={pulse}
         pathLength={1}
-        className="trace-draw stroke-trace"
+        className="trace-draw glow stroke-stable text-stable"
         strokeWidth={2.5}
         strokeLinejoin="round"
         fill="none"
@@ -185,7 +185,7 @@ export function HeroTrace({ className }: { className?: string }) {
       <path
         d={`M${flatStart} ${y} L${HW} ${y}`}
         pathLength={1}
-        className="trace-draw-late stroke-pulse-down"
+        className="trace-draw-late glow stroke-critical text-critical"
         strokeWidth={3.5}
         fill="none"
         vectorEffect="non-scaling-stroke"

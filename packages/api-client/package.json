@@ -1,0 +1,16 @@
+{
+  "name": "api-client",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "generate": "bun run --cwd ../../apps/api openapi && openapi-ts"
+  },
+  "devDependencies": {
+    "@hey-api/openapi-ts": "0.99.0",
+    "@types/bun": "latest",
+    "typescript": "5.9.3"
+  }
+}

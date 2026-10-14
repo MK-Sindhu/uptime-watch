@@ -1,22 +1,16 @@
 import type { Metadata } from "next"
-import {
-  Atkinson_Hyperlegible_Next,
-  IBM_Plex_Mono,
-  Sofia_Sans_Extra_Condensed,
-} from "next/font/google"
+import { IBM_Plex_Mono, Manrope } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import { TooltipProvider } from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 
-const display = Sofia_Sans_Extra_Condensed({
+// One geometric sans for text and numbers (tabular figures on), mono for
+// URLs and timings.
+const sans = Manrope({
   subsets: ["latin"],
-  variable: "--font-condensed",
-})
-
-const body = Atkinson_Hyperlegible_Next({
-  subsets: ["latin"],
-  variable: "--font-atkinson",
+  variable: "--font-manrope",
 })
 
 const mono = IBM_Plex_Mono({
@@ -41,14 +35,15 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cn(
         "antialiased",
-        display.variable,
-        body.variable,
+        sans.variable,
         mono.variable,
         "font-sans"
       )}
     >
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <TooltipProvider>{children}</TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

@@ -5,26 +5,41 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-sans: var(--font-atkinson);
-    --font-heading: var(--font-condensed);
-    --font-display: var(--font-condensed);
+    --font-sans: var(--font-manrope);
+    --font-heading: var(--font-manrope);
+    --font-display: var(--font-manrope);
     --font-mono: var(--font-plex-mono);
 
-    --color-pulse-up: var(--pulse-up);
-    --color-pulse-down: var(--pulse-down);
-    --color-pulse-wait: var(--pulse-wait);
-    --color-trace: var(--trace);
-    --color-grid-minor: var(--grid-minor);
-    --color-grid-major: var(--grid-major);
+    /* Status tones */
+    --color-stable: var(--stable);
+    --color-warning: var(--warning);
+    --color-high: var(--high);
+    --color-critical: var(--critical);
+    --color-info: var(--info);
+    --color-glow: var(--glow);
+    --color-label: var(--label);
+    --color-panel: var(--panel);
+    --color-panel-strong: var(--panel-strong);
+    --color-panel-border: var(--panel-border);
+    --color-grid-line: var(--grid-line);
 
-    --color-sidebar-ring: var(--sidebar-ring);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar: var(--sidebar);
+    /* Older names, kept so existing components follow the new palette */
+    --color-pulse-up: var(--stable);
+    --color-pulse-down: var(--critical);
+    --color-pulse-wait: var(--info);
+    --color-pulse-degraded: var(--warning);
+    --color-trace: var(--trace);
+    --color-grid-minor: var(--grid-line);
+    --color-grid-major: var(--grid-line);
+
+    --color-sidebar-ring: var(--ring);
+    --color-sidebar-border: var(--border);
+    --color-sidebar-accent-foreground: var(--accent-foreground);
+    --color-sidebar-accent: var(--accent);
+    --color-sidebar-primary-foreground: var(--primary-foreground);
+    --color-sidebar-primary: var(--primary);
+    --color-sidebar-foreground: var(--foreground);
+    --color-sidebar: var(--card);
     --color-chart-5: var(--chart-5);
     --color-chart-4: var(--chart-4);
     --color-chart-3: var(--chart-3);
@@ -58,132 +73,194 @@
 }
 
 /*
- * Palette: ECG chart paper.
- *   paper  #FFFCFB   ink   #241B2F   grid  #F6DCD7 / #EDBDB5
- *   down   #D7263D   up    #1B7F6B
- * Dark mode is the same chart on a night monitor.
+ * Control-room glass. Warm charcoal panels over soft olive and amber light;
+ * data glows. Dark is the default theme; light is warm frosted glass.
+ *   stable  green   warning amber   high orange   critical coral-red
  */
 :root {
-    --paper: #fffcfb;
-    --ink: #241b2f;
+    --background: #ebe6df;
+    --ambient-a: rgba(146, 170, 70, 0.34);
+    --ambient-b: rgba(232, 168, 60, 0.3);
+    --ambient-c: rgba(160, 128, 110, 0.2);
 
-    --background: var(--paper);
-    --foreground: var(--ink);
-    --card: #ffffff;
-    --card-foreground: var(--ink);
-    --popover: #ffffff;
-    --popover-foreground: var(--ink);
-    --primary: var(--ink);
-    --primary-foreground: var(--paper);
-    --secondary: #f7ecea;
-    --secondary-foreground: var(--ink);
-    --muted: #f7ecea;
-    --muted-foreground: #6f6375;
-    --accent: #f7ecea;
-    --accent-foreground: var(--ink);
-    --destructive: #d7263d;
-    --border: #eed3ce;
-    --input: #e2bfb9;
-    --ring: #6b4e71;
+    --foreground: #1d1916;
+    --card: #fbf9f6;
+    --card-foreground: #1d1916;
+    --popover: #fbf9f6;
+    --popover-foreground: #1d1916;
+    --panel: rgba(255, 253, 250, 0.62);
+    --panel-strong: rgba(255, 253, 250, 0.86);
+    --panel-border: rgba(60, 45, 30, 0.1);
+    --panel-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset, 0 24px 60px -30px rgba(70, 50, 30, 0.35);
+    --inset-from: #f7f3ee;
+    --inset-to: #ece6de;
+    --inset-border: rgba(60, 45, 30, 0.08);
+    --grid-line: rgba(60, 45, 30, 0.13);
 
-    --trace: var(--ink);
-    --pulse-up: #1b7f6b;
-    --pulse-down: #d7263d;
-    --pulse-wait: #8a7f8f;
-    --grid-minor: #f8e4e0;
-    --grid-major: #efc6bf;
+    --primary: #1d1916;
+    --primary-foreground: #fbf9f6;
+    --secondary: #e7e1d9;
+    --secondary-foreground: #1d1916;
+    --muted: #e4ddd4;
+    --muted-foreground: #6c635b;
+    --accent: #e4ddd4;
+    --accent-foreground: #1d1916;
+    --label: #887e75;
+    --border: rgba(60, 45, 30, 0.12);
+    --input: rgba(60, 45, 30, 0.18);
+    --ring: #9a8a78;
 
-    --chart-1: #1b7f6b;
-    --chart-2: #d7263d;
-    --chart-3: #6b4e71;
-    --chart-4: #8a7f8f;
-    --chart-5: #241b2f;
-    --radius: 0.5rem;
-    --sidebar: var(--paper);
-    --sidebar-foreground: var(--ink);
-    --sidebar-primary: var(--ink);
-    --sidebar-primary-foreground: var(--paper);
-    --sidebar-accent: #f7ecea;
-    --sidebar-accent-foreground: var(--ink);
-    --sidebar-border: #eed3ce;
-    --sidebar-ring: #6b4e71;
+    --stable: #12994f;
+    --warning: #c48410;
+    --high: #d9730d;
+    --critical: #e5484d;
+    --info: #8a8077;
+    --destructive: #e5484d;
+    --glow: #f2b93b;
+    --trace: #2a2420;
+
+    --chart-1: #12994f;
+    --chart-2: #e5484d;
+    --chart-3: #c48410;
+    --chart-4: #8a8077;
+    --chart-5: #1d1916;
+    --radius: 0.75rem;
 }
 
 .dark {
-    --paper: #1a1320;
-    --ink: #efe7f1;
+    --background: #0d0c0b;
+    --ambient-a: rgba(110, 135, 25, 0.4);
+    --ambient-b: rgba(170, 118, 22, 0.34);
+    --ambient-c: rgba(125, 104, 88, 0.3);
 
-    --card: #221a29;
-    --popover: #221a29;
-    --secondary: #2a2031;
-    --muted: #2a2031;
-    --muted-foreground: #a99dae;
-    --accent: #2a2031;
-    --destructive: #ff5a6e;
-    --border: #3a2c40;
-    --input: #4d3c53;
-    --ring: #c7b3cc;
+    --foreground: #efe9e2;
+    --card: #1b1918;
+    --card-foreground: #efe9e2;
+    --popover: #1e1c1b;
+    --popover-foreground: #efe9e2;
+    --panel: rgba(28, 26, 25, 0.74);
+    --panel-strong: rgba(24, 22, 21, 0.92);
+    --panel-border: rgba(255, 245, 235, 0.07);
+    --panel-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 30px 70px -30px rgba(0, 0, 0, 0.75);
+    --inset-from: #292725;
+    --inset-to: #1a1918;
+    --inset-border: rgba(255, 245, 235, 0.06);
+    --grid-line: rgba(255, 245, 235, 0.09);
 
-    --pulse-up: #3cc7a6;
-    --pulse-down: #ff5a6e;
-    --pulse-wait: #9a8fa0;
-    --grid-minor: #22192a;
-    --grid-major: #31243a;
+    --primary: #efe9e2;
+    --primary-foreground: #161413;
+    --secondary: #2a2725;
+    --secondary-foreground: #efe9e2;
+    --muted: #2a2725;
+    --muted-foreground: #a39a91;
+    --accent: #2f2c29;
+    --accent-foreground: #efe9e2;
+    --label: #8c837b;
+    --border: rgba(255, 245, 235, 0.08);
+    --input: rgba(255, 245, 235, 0.13);
+    --ring: #cbbfb2;
 
-    --chart-1: #3cc7a6;
-    --chart-2: #ff5a6e;
-    --chart-3: #c7b3cc;
-    --chart-4: #9a8fa0;
-    --chart-5: #efe7f1;
-    --sidebar-accent: #2a2031;
-    --sidebar-border: #3a2c40;
-    --sidebar-ring: #c7b3cc;
+    --stable: #3ddc84;
+    --warning: #f2c46d;
+    --high: #f5a524;
+    --critical: #ff6b6b;
+    --info: #a39a91;
+    --destructive: #ff6b6b;
+    --glow: #ffe08a;
+    --trace: #efe9e2;
+
+    --chart-1: #3ddc84;
+    --chart-2: #ff6b6b;
+    --chart-3: #f2c46d;
+    --chart-4: #a39a91;
+    --chart-5: #efe9e2;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
-  }
   html {
     @apply font-sans;
+    font-feature-settings: "tnum" 1;
+  }
+  body {
+    @apply text-foreground;
+    min-height: 100svh;
+    background-color: var(--background);
+    /* The ambient light the glass panels sit in. */
+    background-image:
+      radial-gradient(60rem 42rem at -6% -12%, var(--ambient-a), transparent 62%),
+      radial-gradient(52rem 38rem at 104% -8%, var(--ambient-b), transparent 60%),
+      radial-gradient(80rem 44rem at 50% 118%, var(--ambient-c), transparent 62%);
+    background-attachment: fixed;
   }
 }
 
-/* ECG paper: 1 small square = 1/5 of a large square, as on a real chart. */
+/* A frosted panel: the main building block of every page. */
+@utility panel {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 1.5rem;
+  box-shadow: var(--panel-shadow);
+  backdrop-filter: blur(20px) saturate(1.15);
+  -webkit-backdrop-filter: blur(20px) saturate(1.15);
+}
+
+/* The darker recessed surface inside a panel that charts sit on. */
+@utility inset-surface {
+  background: linear-gradient(180deg, var(--inset-from), var(--inset-to));
+  border: 1px solid var(--inset-border);
+  border-radius: 1rem;
+}
+
+/* Small uppercase label for section and column titles. */
+@utility eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--label);
+}
+
+/* Older chart-surface names, now the inset surface with a faint dot grid. */
 @utility ecg-paper {
-  background-color: var(--card);
+  background-color: var(--inset-to);
   background-image:
-    linear-gradient(var(--grid-major) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
-    linear-gradient(var(--grid-minor) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-minor) 1px, transparent 1px);
-  background-size:
-    40px 40px,
-    40px 40px,
-    8px 8px,
-    8px 8px;
-  background-position: -1px -1px;
+    radial-gradient(circle, var(--grid-line) 0.9px, transparent 1.2px),
+    linear-gradient(180deg, var(--inset-from), var(--inset-to));
+  background-size: 14px 14px, 100% 100%;
+  border-color: var(--inset-border);
 }
 
 @utility ecg-paper-fine {
-  background-color: var(--card);
+  background-color: var(--inset-to);
   background-image:
-    linear-gradient(var(--grid-major) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
-    linear-gradient(var(--grid-minor) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-minor) 1px, transparent 1px);
-  background-size:
-    20px 20px,
-    20px 20px,
-    4px 4px,
-    4px 4px;
-  background-position: -1px -1px;
+    radial-gradient(circle, var(--grid-line) 0.8px, transparent 1.1px),
+    linear-gradient(180deg, var(--inset-from), var(--inset-to));
+  background-size: 9px 9px, 100% 100%;
+  border-color: var(--inset-border);
 }
 
-/* The hero trace draws itself once, like a chart feeding out of the machine. */
+/* Lines and marks that glow in their own colour (stroke/fill: currentColor). */
+@utility glow {
+  filter: drop-shadow(0 0 2px currentColor) drop-shadow(0 0 7px color-mix(in oklab, currentColor 55%, transparent));
+}
+
+@utility glow-soft {
+  filter: drop-shadow(0 0 5px color-mix(in oklab, currentColor 45%, transparent));
+}
+
+/* Horizontal scan lines over a bar, like the reference bar charts. */
+@utility scanlines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    color-mix(in oklab, white 22%, transparent) 0 1px,
+    transparent 1px 4px
+  );
+}
+
+/* The hero trace draws itself once. */
 @keyframes trace-draw {
   from {
     stroke-dashoffset: 1;
@@ -203,6 +280,16 @@
   }
 }
 
+@keyframes glow-pulse {
+  0%,
+  100% {
+    opacity: 0.75;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 .trace-draw {
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
@@ -219,13 +306,18 @@
   animation: cursor-blink 1.6s ease-in-out infinite;
 }
 
+.glow-pulse {
+  animation: glow-pulse 2.8s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .trace-draw,
   .trace-draw-late {
     animation: none;
     stroke-dashoffset: 0;
   }
-  .cursor-blink {
+  .cursor-blink,
+  .glow-pulse {
     animation: none;
   }
 }

@@ -7,14 +7,23 @@ export async function createUser(): Promise<{
     jwt: string
 }> {
     const USER_NAME = Math.random().toString();
+    // const res = await axios.post(`${BACKEND_URL}/user/signup`, {
+    //     username: USER_NAME,
+    //     password: "123123"
+    // })
+    // Sign-up needs a password of at least 8 characters.
     const res = await axios.post(`${BACKEND_URL}/user/signup`, {
         username: USER_NAME,
-        password: "123123"
+        password: "123123123"
     })
 
+    // const signinRes = await axios.post(`${BACKEND_URL}/user/signin`, {
+    //     username: USER_NAME,
+    //     password: "123123"
+    // })
     const signinRes = await axios.post(`${BACKEND_URL}/user/signin`, {
         username: USER_NAME,
-        password: "123123"
+        password: "123123123"
     })
 
     return {

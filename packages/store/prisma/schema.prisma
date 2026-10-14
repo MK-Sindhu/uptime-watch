@@ -4,12 +4,21 @@ model user {
   id                       String           @id          @default(uuid())
   username                 String           @unique
   password                 String
+  // Public status page at /status/<status_slug> (null = no page)
+  status_slug              String?          @unique
+  status_title             String?
   website                  website[]
 }
 
 model website {
   id                        String          @id          @default(uuid())
   url                       String
+  // Display name; the UI falls back to the URL's host when null
+  name                      String?
+  // Paused sites stay listed but the pusher stops queuing them
+  paused                    Boolean         @default(false)
+  // Shown on the owner's public status page
+  public                    Boolean         @default(false)
   user_id                   String        
   time_added                 DateTime
   ticks                     website_tick[]
