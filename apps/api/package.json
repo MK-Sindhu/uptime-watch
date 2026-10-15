@@ -24,6 +24,7 @@
     "zod": "^4.6.5"
   },
   "scripts": {
-    "openapi": "bun scripts/emit-openapi.ts"
+    "openapi": "bun scripts/emit-openapi.ts",
+    "check-types": "tsc --noEmit"
   }
 }

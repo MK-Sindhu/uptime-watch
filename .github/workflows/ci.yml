@@ -1,0 +1,144 @@
+# Checks every pull request. cd.yml runs the same checks on main before it
+# deploys. Tests run against real Postgres, Redis and ClickHouse containers,
+# with the API, a worker per region and the pusher started from source.
+name: CI
+
+on:
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Types, lint, API spec
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    concurrency:
+      group: ${{ github.workflow }}-check-${{ github.ref }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+
+      - name: Type-check every workspace
+        run: bun run check-types
+
+      - name: Lint the frontend
+        run: bun run --cwd apps/fe lint
+
+      # The spec is built from the API's zod schemas and the client from the
+      # spec; both are committed. Regenerate them and fail if anything moved.
+      - name: OpenAPI spec and client match the code
+        run: |
+          bun run --cwd packages/api-client generate
+          changes=$(git status --porcelain -- apps/api/openapi.json packages/api-client/src/generated)
+          if [ -n "$changes" ]; then
+            echo "$changes"
+            echo "::error::Run 'bun run --cwd packages/api-client generate' and commit the result."
+            exit 1
+          fi
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: ${{ github.workflow }}-test-${{ github.ref }}
+      cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: uptime
+          POSTGRES_PASSWORD: uptime
+          POSTGRES_DB: uptime
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U uptime"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+      redis:
+        image: redis:7
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+      clickhouse:
+        image: clickhouse/clickhouse-server:25.8
+        env:
+          CLICKHOUSE_DB: uptime
+          CLICKHOUSE_USER: uptime
+          CLICKHOUSE_PASSWORD: uptime
+          CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+        ports: ["8123:8123"]
+        options: >-
+          --ulimit nofile=262144:262144
+          --health-cmd "clickhouse-client --user uptime --password uptime --query 'SELECT 1'"
+          --health-interval 5s --health-timeout 5s --health-retries 30
+    env:
+      DATABASE_URL: postgresql://uptime:uptime@localhost:5432/uptime
+      REDIS_URL: redis://localhost:6379
+      CLICKHOUSE_URL: http://localhost:8123
+      CLICKHOUSE_USER: uptime
+      CLICKHOUSE_PASSWORD: uptime
+      CLICKHOUSE_DB: uptime
+      # Shorter rounds than production (30 s) keep the pipeline test quick.
+      CHECK_INTERVAL_SECONDS: "10"
+      BACKEND_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.2
+      - run: bun install --frozen-lockfile
+
+      # A fresh secret per run; the tests read it to sign expired tokens.
+      - name: Signing secret
+        run: echo "JWT_SECRET=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+
+      - name: Create the tables and the regions
+        run: bun run --cwd packages/store migrate
+
+      - name: Start the API, a worker per region and the pusher
+        run: |
+          mkdir -p logs
+          (cd apps/api && nohup bun index.ts > ../../logs/api.log 2>&1 &)
+          for region in region1 region2; do
+            (cd apps/worker && REGION_ID=$region WORKER_ID=ci-$region nohup bun index.ts > ../../logs/worker-$region.log 2>&1 &)
+          done
+          (cd apps/pusher && nohup bun index.ts > ../../logs/pusher.log 2>&1 &)
+          for _ in $(seq 1 60); do
+            curl -sf http://localhost:3000/health && exit 0
+            sleep 1
+          done
+          echo "::error::The API didn't become healthy within 60 s"
+          cat logs/api.log
+          exit 1
+
+      - name: ClickHouse query and retention tests
+        working-directory: packages/timeseries
+        run: bun test
+
+      - name: API tests, including the end-to-end pipeline
+        working-directory: apps/tests
+        run: bun test
+
+      - name: Service logs
+        if: failure()
+        run: |
+          for f in logs/*.log; do echo "::group::$f"; tail -n 200 "$f"; echo "::endgroup::"; done
+
+  images:
+    name: Images
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/images.yml
+    with:
+      push: false

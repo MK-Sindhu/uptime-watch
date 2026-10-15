@@ -235,7 +235,7 @@ const STEPS = [
     body: "Workers in each region request it on a schedule and time the response.",
     visual: (
       <span className="flex flex-wrap items-center gap-1.5 text-xs">
-        {["USA", "India"].map((r) => (
+        {["Region 1", "Region 2"].map((r) => (
           <span key={r} className="rounded-lg border border-panel-border bg-foreground/[0.04] px-2 py-1 font-medium">
             {r}
           </span>

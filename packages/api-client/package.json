@@ -6,7 +6,8 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "generate": "bun run --cwd ../../apps/api openapi && openapi-ts"
+    "generate": "bun run --cwd ../../apps/api openapi && openapi-ts",
+    "check-types": "tsc --noEmit"
   },
   "devDependencies": {
     "@hey-api/openapi-ts": "0.99.0",

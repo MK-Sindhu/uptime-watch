@@ -23,6 +23,8 @@
   },
   "scripts": {
     "postinstall": "prisma skills sync || exit 0",
-    "contract:emit": "prisma contract emit"
+    "contract:emit": "prisma contract emit",
+    "migrate": "prisma db update --no-interactive && bun scripts/seed-regions.ts",
+    "check-types": "tsc --noEmit"
   }
 }

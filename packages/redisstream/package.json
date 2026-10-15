@@ -14,5 +14,8 @@
   },
   "dependencies": {
     "redis": "^6.3.0"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit"
   }
 }

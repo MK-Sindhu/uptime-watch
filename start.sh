@@ -74,7 +74,7 @@ wait_for "ClickHouse" curl -sf "http://localhost:8123/ping"
 
 REGIONS="$(docker exec "$PG_CONTAINER" psql -U "$PG_USER" -d "$PG_DB" -Atc "SELECT id || ' ' || name FROM region ORDER BY name")"
 [ -n "$REGIONS" ] || fail "The region table is empty. Add a region first, e.g.:
-  docker exec $PG_CONTAINER psql -U $PG_USER -d $PG_DB -c \"INSERT INTO region (id, name) VALUES (gen_random_uuid()::text, 'usa');\""
+  docker exec $PG_CONTAINER psql -U $PG_USER -d $PG_DB -c \"INSERT INTO region (id, name) VALUES ('region1', 'region1');\""
 
 # -------------------------------------------------------------- services
 

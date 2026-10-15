@@ -1,0 +1,97 @@
+# Every push to main: run CI, push the images, then point the deploy repo at
+# them. Argo CD, running in the cluster, sees that commit and rolls it out.
+# This workflow never talks to the cluster itself (GitOps).
+#
+#   uptime-watch (this repo)                uptime-watch-deploy
+#   push to main -> CI -> images -> commit  apps/uptime-watch/overlays/production
+#                                               |
+#                                     Argo CD syncs the cluster
+#
+# Setup (repository Settings > Secrets and variables > Actions), see the
+# deploy repo's README for the commands that create these:
+#   variables  GCP_PROJECT_ID, GCP_REGION, GAR_REPOSITORY,
+#              GCP_WORKLOAD_IDENTITY_PROVIDER, GCP_SERVICE_ACCOUNT,
+#              DEPLOY_REPO (e.g. MK-Sindhu/uptime-watch-deploy)
+#   secret     DEPLOY_REPO_SSH_KEY: private half of a deploy key with write
+#              access to the deploy repo only
+name: CD
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# One deploy at a time, in order. A newer push waits instead of cancelling a
+# deploy that is halfway through.
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: CI
+    uses: ./.github/workflows/ci.yml
+
+  images:
+    name: Images
+    needs: ci
+    permissions:
+      contents: read
+      id-token: write # Workload Identity Federation
+    uses: ./.github/workflows/images.yml
+    with:
+      push: true
+
+  deploy:
+    name: Update the deploy repo
+    needs: images
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Add required reviewers to this environment (Settings > Environments)
+    # to approve each production deploy by hand.
+    environment: production
+    env:
+      REGISTRY: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GAR_REPOSITORY }}
+      OVERLAY: apps/uptime-watch/overlays/production/kustomization.yaml
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: ${{ vars.DEPLOY_REPO }}
+          ssh-key: ${{ secrets.DEPLOY_REPO_SSH_KEY }}
+          path: deploy
+
+      - name: Point the production overlay at this commit's images
+        working-directory: deploy
+        env:
+          TAG: ${{ github.sha }}
+        run: |
+          for image in api worker pusher migrate fe; do
+            IMAGE=$image yq -i '
+              (.images[] | select(.name == "uptime-watch/" + strenv(IMAGE)))
+                |= (.newName = strenv(REGISTRY) + "/" + strenv(IMAGE) | .newTag = strenv(TAG))
+            ' "$OVERLAY"
+          done
+          git diff
+
+      - name: Commit and push
+        working-directory: deploy
+        env:
+          SOURCE: ${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}
+        run: |
+          git config user.name "uptime-watch-ci"
+          git config user.email "uptime-watch-ci@users.noreply.github.com"
+          git add "$OVERLAY"
+          if git diff --cached --quiet; then
+            echo "The deploy repo already points at ${GITHUB_SHA::7}."
+            exit 0
+          fi
+          git commit -m "Deploy uptime-watch ${GITHUB_SHA::7}" -m "Source: $SOURCE"
+          # Someone may have pushed a manual change meanwhile: rebase and retry.
+          for _ in 1 2 3; do
+            git push && exit 0
+            git pull --rebase
+          done
+          exit 1

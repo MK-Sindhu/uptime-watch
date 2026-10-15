@@ -4,11 +4,11 @@ import { formatMs } from "@/lib/format"
 import { latestByRegion } from "@/lib/site"
 import { timeAgo } from "@/lib/time"
 
-// "usa" -> "USA", "india" -> "India"
+// "region1" -> "Region 1", "usa" -> "USA", "mumbai" -> "Mumbai"
 export function regionLabel(name: string) {
-  return name.length <= 3
-    ? name.toUpperCase()
-    : name.charAt(0).toUpperCase() + name.slice(1)
+  if (name.length <= 3) return name.toUpperCase()
+  const spaced = name.replace(/(\D)(\d+)$/, "$1 $2")
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1)
 }
 
 function describeTick(tick: Tick) {

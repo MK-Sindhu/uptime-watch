@@ -40,8 +40,8 @@ flowchart TB
         redis[["Redis stream<br/>uptime-watch:website<br/>one consumer group per region"]]
         subgraph workers["workers · any number per region"]
             direction LR
-            wusa["worker<br/>region: usa"]
-            wind["worker<br/>region: india"]
+            wr1["worker<br/>region1"]
+            wr2["worker<br/>region2"]
         end
     end
 
@@ -56,14 +56,14 @@ flowchart TB
 
     pg -->|"1 · every website"| pusher
     pusher -->|"2 · XADD url + id"| redis
-    redis -->|"3 · XREADGROUP"| wusa
-    redis -->|"3 · XREADGROUP"| wind
-    wusa -->|"5 · insert batch"| ch
-    wind -->|"5 · insert batch"| ch
-    wusa -->|"4 · HTTP GET"| sites
-    wind -->|"4 · HTTP GET"| sites
-    wusa -.->|"6 · XACK"| redis
-    wind -.->|"6 · XACK"| redis
+    redis -->|"3 · XREADGROUP"| wr1
+    redis -->|"3 · XREADGROUP"| wr2
+    wr1 -->|"5 · insert batch"| ch
+    wr2 -->|"5 · insert batch"| ch
+    wr1 -->|"4 · HTTP GET"| sites
+    wr2 -->|"4 · HTTP GET"| sites
+    wr1 -.->|"6 · XACK"| redis
+    wr2 -.->|"6 · XACK"| redis
 ```
 
 ### Life of a check
@@ -177,7 +177,7 @@ erDiagram
     }
     region {
         string id PK
-        string name "usa, india"
+        string name "region1, region2"
     }
 ```
 
@@ -595,7 +595,9 @@ cd apps/pusher && bun index.ts                                            # only
 cd apps/fe     && bun run dev                                             # :3001
 ```
 
-`REGION_ID` must be the id of a row in the `region` table.
+`REGION_ID` must be the id of a row in the `region` table. The regions are
+named `region1` and `region2`; `cd packages/store && bun scripts/seed-regions.ts`
+creates any that are missing (with the name as the id).
 
 ### Environment variables (set these in Kubernetes)
 
@@ -610,6 +612,7 @@ cd apps/fe     && bun run dev                                             # :300
 | `JWT_EXPIRES_IN` | api | `7d` (or `12h`, or a number of seconds) |
 | `CHECK_INTERVAL_SECONDS` | pusher, api | `30` (set the same value on both) |
 | `REGION_ID` | worker | required |
+| `REGIONS` | migration job | `region1,region2` (region rows to create) |
 | `WORKER_ID` | worker | the pod's `HOSTNAME` |
 | `API_URL` | fe | `http://localhost:3000` |
 | `RATE_LIMIT_PER_MINUTE` | api | `120` |
@@ -619,16 +622,62 @@ cd apps/fe     && bun run dev                                             # :300
 | `RATE_LIMIT_AGGREGATES_PER_MINUTE` | api | `120` |
 | `RATE_LIMIT_WEBSITE_WRITES_PER_MINUTE` | api | `30` |
 | `RATE_LIMIT_PUBLIC_STATUS_PER_MINUTE` | api | `30` |
-| `TRUST_PROXY` | api | `loopback, linklocal, uniquelocal` |
+| `TRUST_PROXY` | api | `loopback, linklocal, uniquelocal` (on GKE, add Google's load balancer ranges; the deploy repo does) |
 
-Notes for Kubernetes:
+Notes for Kubernetes (the manifests are in the
+[uptime-watch-deploy](https://github.com/MK-Sindhu/uptime-watch-deploy) repo):
 - The API serves `GET /health`. It returns 200 only when Postgres and
-  ClickHouse both answer, so use it for liveness and readiness probes.
+  ClickHouse both answer, so use it as the readiness probe (the liveness
+  probe only checks the port, so a database outage doesn't restart pods).
 - The API, worker and pusher finish their current work and exit on `SIGTERM`.
 - Run the pusher with `replicas: 1`. Every pusher queues every website, so two
   pushers check every site twice.
 - Workers can scale out freely. If a worker pod dies mid-batch, another worker
   re-claims its unacknowledged checks after 60 seconds.
+
+## Docker images
+
+Five images, all built from the repo root. Each Dockerfile first runs
+`turbo prune`, so an image only contains its own workspace and the packages
+it imports.
+
+| Image | Dockerfile | What's inside | Size |
+|---|---|---|---|
+| `api`, `worker`, `pusher` | `Dockerfile` (`--build-arg APP=…`) | One file made by `bun build`: the service and only the code it imports. No `node_modules`. Runs as the `bun` user. | about 285 MB, mostly the Bun base image |
+| `migrate` | `Dockerfile` (`--target migrate`) | `packages/store` with the Prisma CLI. Runs `prisma db update --no-interactive` and the region seed, then exits. | about 1.9 GB (the Prisma 8 CLI) |
+| `fe` | `apps/fe/Dockerfile` | Next.js standalone output on Node 24. `API_URL` defaults to `http://api:3000`, the API's Service in the cluster. | about 325 MB |
+
+```sh
+docker build --build-arg APP=api -t uptime-watch-api .
+docker build --build-arg APP=store --build-arg APP_DIR=packages/store --target migrate -t uptime-watch-migrate .
+docker build -f apps/fe/Dockerfile -t uptime-watch-fe .
+```
+
+The services run with a read-only root filesystem (plus a writable `/tmp`),
+which is how the Kubernetes manifests start them.
+
+## CI/CD
+
+```mermaid
+flowchart LR
+    pr["pull request"] --> ci["ci.yml<br/>types, lint, API spec,<br/>tests, image builds + scan"]
+    main["push to main"] --> cd["cd.yml<br/>ci.yml, then push images,<br/>then update the deploy repo"]
+    cd --> gar[("Artifact Registry<br/>tag = commit SHA")]
+    cd --> deploy[("uptime-watch-deploy<br/>overlays/production")]
+    deploy --> argo["Argo CD syncs GKE"]
+```
+
+| Workflow | When | What it does |
+|---|---|---|
+| `.github/workflows/ci.yml` | every pull request (and inside `cd.yml`) | `bun run check-types` (every workspace), frontend lint, fails if `openapi.json` or the generated client is out of date, then all tests against Postgres, Redis and ClickHouse service containers with the API, a worker per region and the pusher running. Pull requests also build all five images and scan them with Trivy (report only). |
+| `.github/workflows/images.yml` | called by the two above | Builds the five images with layer caching; on main, pushes them to Artifact Registry tagged with the commit SHA. |
+| `.github/workflows/cd.yml` | every push to `main` | CI, then the images, then commits the new tags to `uptime-watch-deploy`. Argo CD in the cluster does the rollout; this repo never holds cluster credentials. Deploys run one at a time. |
+
+Signing in to Google Cloud uses Workload Identity Federation (GitHub's OIDC
+token), so no service-account key is stored anywhere. The repository
+variables and the deploy key `cd.yml` needs, and the commands that create
+them, are in the deploy repo's README. Third-party actions are pinned to
+commit SHAs.
 
 ## Tests
 
