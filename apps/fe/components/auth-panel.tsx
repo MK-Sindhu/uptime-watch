@@ -13,6 +13,11 @@ import { cn } from "@/lib/utils"
 
 type Mode = "signin" | "signup"
 
+// TEMP: demo account for showing the app. Created by
+// packages/store/scripts/seed-demo.ts; remove this (and the button below)
+// when the demo is over.
+const DEMO = { username: "demo", password: "demo1234" }
+
 const MODES: { value: Mode; label: string }[] = [
   { value: "signin", label: "Sign in" },
   { value: "signup", label: "Create account" },
@@ -131,6 +136,26 @@ export function AuthPanel({ className }: { className?: string }) {
         >
           {pending ? (mode === "signin" ? "Signing in…" : "Creating account…") : action}
         </Button>
+
+        {/* TEMP: demo account, see DEMO above */}
+        {mode === "signin" && (
+          <p className="text-center text-sm text-muted-foreground">
+            Just looking? Sign in as{" "}
+            <span className="font-mono text-foreground">{DEMO.username}</span> /{" "}
+            <span className="font-mono text-foreground">{DEMO.password}</span>.{" "}
+            <button
+              type="button"
+              className="font-semibold text-foreground underline underline-offset-4 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 rounded-sm"
+              onClick={() => {
+                setUsername(DEMO.username)
+                setPassword(DEMO.password)
+                setError(null)
+              }}
+            >
+              Use demo account
+            </button>
+          </p>
+        )}
       </form>
     </Panel>
   )
