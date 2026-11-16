@@ -14,6 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { isDemoSession } from "@/lib/api"
 
 // Desktop: username, Status page, theme, Sign out in a row.
 // Phone: the same actions in one menu next to the wordmark.
@@ -39,6 +40,12 @@ export function DashboardHeader({
       {username && (
         <span className="mr-2 text-sm font-medium text-muted-foreground">
           {username}
+        </span>
+      )}
+      {/* TEMP demo: the sample-data demo (lib/demo.ts) says so */}
+      {username && isDemoSession() && (
+        <span className="mr-2 shrink-0 rounded-md border border-panel-border bg-foreground/[0.05] px-1.5 py-px text-[10px] font-semibold tracking-[0.12em] text-label uppercase">
+          Sample data
         </span>
       )}
       <Button variant="ghost" size="sm" onClick={onStatusPage}>

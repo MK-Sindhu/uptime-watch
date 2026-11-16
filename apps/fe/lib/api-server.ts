@@ -3,10 +3,22 @@
 import { createServerApiClient, getPublicStatus, type PublicStatus } from "api-client"
 import { headers } from "next/headers"
 
+import { DEMO_SLUG, demoPublicStatus } from "./demo"
+
 const serverClient = createServerApiClient(process.env.API_URL ?? "http://localhost:3000")
 
 // null = no status page at this address.
 export async function fetchPublicStatus(slug: string): Promise<PublicStatus | null> {
+  // TEMP demo: /status/demo shows sample data (lib/demo.ts) when the API
+  // isn't reachable or has no page there, e.g. the frontend alone on Vercel.
+  if (slug === DEMO_SLUG) {
+    const real = await fetchFromApi(slug).catch(() => null)
+    return real ?? demoPublicStatus()
+  }
+  return fetchFromApi(slug)
+}
+
+async function fetchFromApi(slug: string): Promise<PublicStatus | null> {
   // Pass the visitor's address on. Without it every visitor reaches the API
   // from this server's IP and they all share one rate-limit bucket. The API
   // only trusts this header from private-network proxies (like this server).

@@ -44,6 +44,8 @@ import {
   type WebsitePatch,
 } from "api-client"
 
+import * as demo from "./demo"
+
 export type {
   DailyUptime,
   DailyUptimeDay,
@@ -125,6 +127,18 @@ export function clearSession() {
     localStorage.removeItem(TOKEN_KEY)
     localStorage.removeItem(USERNAME_KEY)
   } catch {}
+  demo.resetDemo()
+}
+
+// TEMP demo: signed in to the sample-data demo (lib/demo.ts), not the API.
+export function isDemoSession() {
+  return getSession()?.token === demo.DEMO_TOKEN
+}
+
+function demoSite(websiteId: string) {
+  const site = demo.findDemoSite(websiteId)
+  if (!site) throw new ApiError(404, "No such website.", true)
+  return site
 }
 
 configureApiClient({ baseUrl: "/api", getToken: () => getSession()?.token })
@@ -158,8 +172,21 @@ async function call<T>(
 // ---------------------------------------------------------------- account
 
 export async function signIn(username: string, password: string) {
-  const { jwt } = await call(signInRequest({ body: { username, password } }))
-  saveSession(jwt, username)
+  try {
+    const { jwt } = await call(signInRequest({ body: { username, password } }))
+    saveSession(jwt, username)
+  } catch (e) {
+    // TEMP demo: no API answered (e.g. only the frontend is deployed), so
+    // demo / demo1234 opens the sample-data demo instead. A real "wrong
+    // password" (403) or rate limit (429) still shows as an error.
+    const apiAnswered = e instanceof ApiError && (e.status === 403 || e.status === 429)
+    if (!apiAnswered && demo.isDemoLogin(username, password)) {
+      demo.resetDemo()
+      saveSession(demo.DEMO_TOKEN, demo.DEMO_USERNAME)
+      return
+    }
+    throw e
+  }
 }
 
 export async function signUp(username: string, password: string) {
@@ -170,33 +197,53 @@ export async function signUp(username: string, password: string) {
 // --------------------------------------------------------------- websites
 
 export async function listWebsites() {
+  if (isDemoSession()) return demo.demoWebsites()
   const { websites } = await call(listWebsitesRequest())
   return websites
 }
 
 export async function addWebsite(url: string) {
+  if (isDemoSession()) {
+    // Same rules as the API: http(s) only, at most 2048 characters.
+    let valid = false
+    try {
+      valid = url.length <= 2048 && ["http:", "https:"].includes(new URL(url).protocol)
+    } catch {}
+    if (!valid) throw new ApiError(411, "Length Required")
+    if (demo.demoSiteCount() >= demo.DEMO_MAX_SITES) {
+      throw new ApiError(403, `You can watch at most ${demo.DEMO_MAX_SITES} websites.`, true)
+    }
+    return { id: demo.addDemoSite(url).id }
+  }
   return call(createWebsite({ body: { url } }))
 }
 
 export async function getWebsite(websiteId: string) {
+  if (isDemoSession()) return demo.demoWebsiteDetail(demoSite(websiteId))
   return call(getWebsiteDetail({ path: { websiteId } }))
 }
 
 export async function updateWebsite(websiteId: string, patch: WebsitePatch) {
+  if (isDemoSession()) return demo.updateDemoSite(demoSite(websiteId), patch)
   return call(updateWebsiteRequest({ path: { websiteId }, body: patch }))
 }
 
 export async function deleteWebsite(websiteId: string) {
+  if (isDemoSession()) return demo.removeDemoSite(demoSite(websiteId))
   await call(deleteWebsiteRequest({ path: { websiteId } }))
 }
 
 // ----------------------------------------------------------------- charts
 
 export async function getOverview(websiteId: string, range: RangeKey) {
+  if (isDemoSession()) return demo.demoOverview(demoSite(websiteId), range)
   return call(getWebsiteOverview({ path: { websiteId }, query: { range } }))
 }
 
 export async function getSeries(websiteId: string, range: RangeKey, region?: string | null) {
+  if (isDemoSession()) {
+    return demo.demoSeries(demoSite(websiteId), range, region && region !== "all" ? region : null)
+  }
   return call(
     getWebsiteSeries({
       path: { websiteId },
@@ -206,12 +253,14 @@ export async function getSeries(websiteId: string, range: RangeKey, region?: str
 }
 
 export async function getIncidents(websiteId: string, range: RangeKey, limit = 50) {
+  if (isDemoSession()) return demo.demoIncidents(demoSite(websiteId), range, limit)
   return call(getWebsiteIncidents({ path: { websiteId }, query: { range, limit } }))
 }
 
 // Day boundaries follow the viewer's time zone.
 export async function getDaily(websiteId: string, days = 90) {
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"
+  if (isDemoSession()) return demo.demoDaily(demoSite(websiteId), days, tz)
   return call(getWebsiteDaily({ path: { websiteId }, query: { days, tz } }))
 }
 
@@ -219,10 +268,12 @@ export async function getDaily(websiteId: string, days = 90) {
 // check-flow diagram.
 // The check flow needs individual checks (kept 5 days), so up to 24 hours.
 export async function getFleet(range: "1h" | "24h" = "24h") {
+  if (isDemoSession()) return demo.demoFleet(range)
   return call(getFleetRequest({ query: { range } }))
 }
 
 export async function listRegions() {
+  if (isDemoSession()) return demo.DEMO_REGIONS
   const { regions } = await call(listRegionsRequest())
   return regions
 }
@@ -230,10 +281,14 @@ export async function listRegions() {
 // ------------------------------------------------------------ status page
 
 export async function getStatusPageSettings() {
+  if (isDemoSession()) return demo.demoStatusPageSettings()
   return call(getStatusPageSettingsRequest())
 }
 
 export async function updateStatusPage(patch: { slug?: string | null; title?: string | null }) {
+  if (isDemoSession()) {
+    throw new ApiError(403, "The demo account's status page stays at /status/demo.", true)
+  }
   return call(updateStatusPageRequest({ body: patch }))
 }
 

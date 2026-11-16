@@ -13,9 +13,10 @@ import { cn } from "@/lib/utils"
 
 type Mode = "signin" | "signup"
 
-// TEMP: demo account for showing the app. Created by
-// packages/store/scripts/seed-demo.ts; remove this (and the button below)
-// when the demo is over.
+// TEMP: demo account for showing the app. With no API (e.g. on Vercel) it
+// signs in to sample data (lib/demo.ts); with an API, to the real account
+// from packages/store/scripts/seed-demo.ts. Remove this (and the button
+// below) when the demo is over.
 const DEMO = { username: "demo", password: "demo1234" }
 
 const MODES: { value: Mode; label: string }[] = [
